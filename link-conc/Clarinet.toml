@@ -7,6 +7,8 @@ cache_dir = '.\.cache'
 requirements = []
 [contracts.Secure-Voting]
 path = 'contracts/Secure-Voting.clar'
+[contracts.voter-registration]
+path = 'contracts/voter-registration.clar'
 clarity_version = 3
 epoch = 3.0
 [repl.analysis]
