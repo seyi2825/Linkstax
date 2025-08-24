@@ -36,7 +36,7 @@
     (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
     (asserts! (not (var-get election-active)) ERR-ELECTION-NOT-ACTIVE)
     (var-set election-active true)
-    (var-set election-end-height (+ stacks-block-height duration))
+    (var-set election-end-height (+ block-height duration))
     (ok true)))
 
 ;; Register voter with a blinded identity
@@ -44,7 +44,7 @@
 (define-public (register-voter (blinded-identity (buff 32)))
   (begin
     (asserts! (var-get election-active) ERR-ELECTION-NOT-ACTIVE)
-    (asserts! (< stacks-block-height (var-get election-end-height)) ERR-ELECTION-ENDED)
+    (asserts! (< block-height (var-get election-end-height)) ERR-ELECTION-ENDED)
     (asserts! (is-none (map-get? voter-registry tx-sender)) ERR-ALREADY-VOTED)
     (map-set voter-registry tx-sender true)
     (ok true)))
@@ -54,7 +54,7 @@
 (define-public (commit-vote (vote-commitment (buff 32)))
   (begin
     (asserts! (var-get election-active) ERR-ELECTION-NOT-ACTIVE)
-    (asserts! (< stacks-block-height (var-get election-end-height)) ERR-ELECTION-ENDED)
+    (asserts! (< block-height (var-get election-end-height)) ERR-ELECTION-ENDED)
     (asserts! (is-some (map-get? voter-registry tx-sender)) ERR-NOT-REGISTERED)
     (asserts! (is-none (map-get? vote-commitments tx-sender)) ERR-ALREADY-VOTED)
     (map-set vote-commitments tx-sender vote-commitment)
@@ -66,7 +66,7 @@
   (let ((commitment (unwrap! (map-get? vote-commitments tx-sender) ERR-COMMITMENT-NOT-FOUND))
         (calculated-commitment (hash160 nonce)))
     (asserts! (var-get election-active) ERR-ELECTION-NOT-ACTIVE)
-    (asserts! (>= stacks-block-height (var-get election-end-height)) ERR-ELECTION-NOT-ENDED)
+    (asserts! (>= block-height (var-get election-end-height)) ERR-ELECTION-NOT-ENDED)
     (asserts! (is-eq commitment calculated-commitment) ERR-INVALID-REVEAL)
     (asserts! (is-none (map-get? revealed-votes tx-sender)) ERR-ALREADY-REVEALED)
     (map-set revealed-votes tx-sender vote)
@@ -78,7 +78,7 @@
   (begin
     (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
     (asserts! (var-get election-active) ERR-ELECTION-NOT-ACTIVE)
-    (asserts! (>= stacks-block-height (var-get election-end-height)) ERR-ELECTION-NOT-ENDED)
+    (asserts! (>= block-height (var-get election-end-height)) ERR-ELECTION-NOT-ENDED)
     (var-set election-active false)
     (ok true)))
 
